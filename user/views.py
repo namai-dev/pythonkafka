@@ -13,7 +13,7 @@ class UserService(APIView):
     def __init__(self):
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
     def post(self, request):
-        serializer =user_serializer(data=request.data)  # Use request.data instead of request.POST
+        serializer =user_serializer(data=request.data) 
 
         try:
             if serializer.is_valid():
@@ -24,10 +24,13 @@ class UserService(APIView):
                 return Response("User saved.", status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:  # Use the correct exception type and capture the exception object
+        except Exception as e:  
             print(e)
             return Response("Error occurred.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
             self.producer.close()
+
+    def get(self, request):
+        pass
 
 
