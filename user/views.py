@@ -5,6 +5,7 @@ from rest_framework import status
 from kafka import KafkaProducer
 from .models import CustomUser, UserAccount, Transaction
 from .my_functions import generate_account_number
+import json
 
 class Testing(APIView):
     def get(self, request):
@@ -34,6 +35,12 @@ class UserService(APIView):
                 user = serializer.save()
                 email = serializer.validated_data.get("email")
                 account = UserAccount.objects.create(user=user, account_number=generate_account_number(), balance=0.0)
+                account_details ={
+                    "email":account.user.email,
+                    "account_number":account.account_number,
+                    "balance":account.balance
+                }
+                self.producer.send("account", value=json.dumps(account_details).encode("utf-8"))
                 print(account)
                 self.producer.send("email", value=email.encode("utf-8"))
                 return Response("User saved.", status=status.HTTP_201_CREATED)

@@ -45,6 +45,10 @@ class UserAccount(models.Model):
     account_number = models.IntegerField(max_length=12)
     balance = models.FloatField(default=0.0)
 
+    def __str__(self):
+        return str(self.account_number)
+    
+
 
 class Transaction(models.Model):
     account = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
