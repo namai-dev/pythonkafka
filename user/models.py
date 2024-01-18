@@ -42,6 +42,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class UserAccount(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    account_number = models.IntegerField(max_length=12)
     balance = models.FloatField(default=0.0)
 
 
@@ -51,7 +52,12 @@ class Transaction(models.Model):
     transaction_type = models.PositiveSmallIntegerField(
         choices = TRANSACTION_TYPE_CHOICE
     )
+    balance_after_transaction = models.FloatField(max_length=12)
     time_stamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.account
+    
 
     class META:
         ordering = ["time_stamp"]
