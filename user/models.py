@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.contrib.auth.hashers import make_password
+from .constants import TRANSACTION_TYPE_CHOICE
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -38,4 +39,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+class UserAccount(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    balance = models.FloatField(default=0.0)
+
+
+class Transaction(models.Model):
+    account = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    amount = models.FloatField()
+    transaction_type = models.PositiveSmallIntegerField(
+        choices = TRANSACTION_TYPE_CHOICE
+    )
+    time_stamp = models.DateTimeField(auto_now_add=True)
+
+    class META:
+        ordering = ["time_stamp"]
+
 

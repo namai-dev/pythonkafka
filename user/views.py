@@ -1,12 +1,26 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import user_serializer
+from .serializers import user_serializer, Transaction_Serializer, User_Account_Serializer
 from rest_framework import status
 from kafka import KafkaProducer
+from .models import CustomUser, UserAccount, Transaction
+from .my_functions import generate_account_number
 
 class Testing(APIView):
     def get(self, request):
         return Response("Welcome to microservices...")
+
+class AuthService(APIView):
+    def get(self, request):
+        data = request.data
+        username = data["email"]
+        password = data["password"]
+        user = CustomUser.objects.get(username=username)
+        if user == null:
+            return Response("Invalid credentials", status=status.HTTP_401_UNAUTHORIZED)
+        user_pass = user.password
+        if password != user_pass:
+            return Response("Invalid credentials", status=status.HTTP_401_UNAUTHORIZED)
 
 
 class UserService(APIView):
@@ -17,9 +31,10 @@ class UserService(APIView):
 
         try:
             if serializer.is_valid():
-                serializer.save()
+                user = serializer.save()
                 email = serializer.validated_data.get("email")
-                print(email)
+                account = UserAccount.objects.create(user=user, account_number=generate_account_number(), balance=0.0)
+                print(account)
                 self.producer.send("email", value=email.encode("utf-8"))
                 return Response("User saved.", status=status.HTTP_201_CREATED)
             else:
