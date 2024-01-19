@@ -109,5 +109,17 @@ class WithdrawView(APIView):
 
 
 
+class TransactionHistoryView(APIView):
+    def get(self, request, account_number):
+        try:
+            transactions = Transaction.objects.filter(account__account_number=account_number)
+        except Transaction.DoesNotExist:
+            return Response("No transactions found for the specified account.", status=status.HTTP_404_NOT_FOUND)
+        
+        serialized_transactions = TransactionSerializer(transactions, many=True)
+        return Response(serialized_transactions.data)
+
+
+
 
 
