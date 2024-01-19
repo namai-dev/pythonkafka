@@ -78,6 +78,36 @@ class DepositView(APIView):
 
         return Response("Deposit Successful. Check your email")
 
+class WithdrawView(APIView):
+    def post(self, request):
+        data = request.data
+        withdrawal_amount = data["amount"]
+        account_no = data["account_number"]
+        
+        try:
+            account = UserAccount.objects.get(account_number=account_no)
+        except UserAccount.DoesNotExist:
+            return Response("Invalid account..", status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        if withdrawal_amount <= 0:
+            return Response("Invalid amount...", status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        if account.balance < withdrawal_amount:
+            return Response("Insufficient funds...", status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        account.balance -= withdrawal_amount
+        account.save()  # Save the updated balance
+
+        transaction = Transaction.objects.create(
+            account=account,
+            amount=-withdrawal_amount,  # Negative amount for withdrawal
+            transaction_type=2,  # Assuming 2 is the code for withdrawal
+            balance_after_transaction=account.balance
+        )
+
+        return Response("Withdrawal Successful. Check your email")
+
+
 
 
 
