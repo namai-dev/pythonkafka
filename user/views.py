@@ -52,7 +52,32 @@ class UserService(APIView):
         finally:
             self.producer.close()
 
-    def get(self, request):
-        pass
+
+
+class DepositView(APIView):
+    def post(self, request):
+        data = request.data
+        deposit_amount = data["amount"]
+        account_no = data["account_number"]
+        account = UserAccount.objects.get(account_number=account_no)
+        
+        if not account:
+            return Response("Invalid account..", status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        if deposit_amount <= 0:
+            return Response("Invalid amount...", status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        account.balance += deposit_amount
+        account.save()
+        transaction = Transaction.objects.create(
+            account=account,
+            amount=deposit_amount,
+            transaction_type=1,
+            balance_after_transaction=account.balance
+        )
+
+        return Response("Deposit Successful. Check your email")
+
+
 
 
