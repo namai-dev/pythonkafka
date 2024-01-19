@@ -149,14 +149,14 @@ class SendMoneyView(APIView):
         sender_transaction = Transaction.objects.create(
             account=sender_account,
             amount=-amount,
-            transaction_type=Transaction.SEND_MONEY,
+            transaction_type=3,
             balance_after_transaction=sender_account.balance
         )
 
         receiver_transaction = Transaction.objects.create(
             account=receiver_account,
             amount=amount,
-            transaction_type=Transaction.SEND_MONEY,
+            transaction_type=3,
             balance_after_transaction=receiver_account.balance
         )
 
