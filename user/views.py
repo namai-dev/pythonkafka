@@ -55,6 +55,8 @@ class UserService(APIView):
 
 
 class DepositView(APIView):
+    def __init__(self):
+        self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
     def post(self, request):
         data = request.data
         deposit_amount = data["amount"]
