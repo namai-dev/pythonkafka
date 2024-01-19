@@ -121,5 +121,55 @@ class TransactionHistoryView(APIView):
 
 
 
+class SendMoneyView(APIView):
+    def post(self, request):
+        data = request.data
+        sender_account_no = data.get("sender_account_number")
+        receiver_account_no = data.get("receiver_account_number")
+        amount = data.get("amount")
+
+        try:
+            sender_account = UserAccount.objects.get(account_number=sender_account_no)
+            receiver_account = UserAccount.objects.get(account_number=receiver_account_no)
+        except UserAccount.DoesNotExist:
+            return Response("Invalid sender or receiver account.", status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        if amount <= 0:
+            return Response("Invalid amount.", status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        if sender_account.balance < amount:
+            return Response("Insufficient funds.", status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        sender_account.balance -= amount
+        receiver_account.balance += amount
+
+        sender_account.save()
+        receiver_account.save()
+
+        sender_transaction = Transaction.objects.create(
+            account=sender_account,
+            amount=-amount,
+            transaction_type=Transaction.SEND_MONEY,
+            balance_after_transaction=sender_account.balance
+        )
+
+        receiver_transaction = Transaction.objects.create(
+            account=receiver_account,
+            amount=amount,
+            transaction_type=Transaction.SEND_MONEY,
+            balance_after_transaction=receiver_account.balance
+        )
+
+        serialized_sender_transaction = TransactionSerializer(sender_transaction).data
+        serialized_receiver_transaction = TransactionSerializer(receiver_transaction).data
+
+        return Response({
+            "message": "Money sent successfully.",
+            "sender_transaction": serialized_sender_transaction,
+            "receiver_transaction": serialized_receiver_transaction
+        })
+
+
+
 
 
