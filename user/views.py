@@ -114,6 +114,8 @@ class WithdrawView(APIView):
 
 
 class TransactionHistoryView(APIView):
+    def __init__(self):
+        self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
     def get(self, request, account_number):
         try:
             transactions = Transaction.objects.filter(account__account_number=account_number)
@@ -126,6 +128,8 @@ class TransactionHistoryView(APIView):
 
 
 class SendMoneyView(APIView):
+    def __init__(self):
+        self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
     def post(self, request):
         data = request.data
         sender_account_no = data.get("sender_account_number")
