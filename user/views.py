@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import user_serializer, Transaction_Serializer, User_Account_Serializer
+from .serializers import user_serializer, Transaction_Serializer, User_Account_Serializer, TransactionSerializer
 from rest_framework import status
 from kafka import KafkaProducer
 from .models import CustomUser, UserAccount, Transaction
